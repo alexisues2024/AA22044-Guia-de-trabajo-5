@@ -1,0 +1,153 @@
+section .data
+    prompt_dividend db 'Ingrese el dividendo: ', 0
+    prompt_divisor db 'Ingrese el divisor: ', 0
+    result_msg db 'Cociente: ', 0
+    remainder_msg db 'Residuo: ', 0
+    newline db 10, 0
+
+section .bss
+    dividend resb 10
+    divisor resb 10
+    result_val resb 12
+    remainder_val resb 12
+
+section .text
+    global _start
+
+_start:
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, prompt_dividend
+    mov edx, 21
+    int 0x80
+
+
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, dividend
+    mov edx, 10
+    int 0x80
+
+
+    mov esi, dividend
+    call str_to_int
+    mov [dividend], eax
+
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, prompt_divisor
+    mov edx, 19
+    int 0x80
+
+
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, divisor
+    mov edx, 10
+    int 0x80
+
+
+    mov esi, divisor
+    call str_to_int
+    mov [divisor], eax
+
+
+    mov eax, [dividend]
+    mov ebx, [divisor]
+    cdq                  
+    idiv ebx              
+
+
+    mov esi, result_val
+    call int_to_ascii    
+    mov esi, remainder_val
+    call int_to_ascii     
+
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, result_msg
+    mov edx, 10
+    int 0x80
+
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, result_val
+    mov edx, 12
+    int 0x80
+
+ 
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, newline
+    mov edx, 1
+    int 0x80
+
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, remainder_msg
+    mov edx, 9
+    int 0x80
+
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, remainder_val
+    mov edx, 12
+    int 0x80
+
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, newline
+    mov edx, 1
+    int 0x80
+
+
+    mov eax, 1
+    xor ebx, ebx
+    int 0x80
+
+str_to_int:
+
+    xor eax, eax
+    xor ebx, ebx
+.next_digit:
+    mov bl, byte [esi]
+    cmp bl, 10
+    je .done
+    sub bl, '0'
+    imul eax, eax, 10
+    add eax, ebx
+    inc esi
+    jmp .next_digit
+.done:
+    ret
+
+int_to_ascii:
+
+    mov ecx, 10
+    mov edi, esi
+    add edi, 11
+    mov byte [edi], 0     
+
+int_to_ascii_loop:
+    xor edx, edx
+    div ecx
+    add dl, '0'
+    dec edi
+    mov [edi], dl
+    test eax, eax
+    jnz int_to_ascii_loop
+
+    mov eax, edi
+    mov edi, esi
+
+
+    mov ecx, 11
+    rep movsb
+    ret

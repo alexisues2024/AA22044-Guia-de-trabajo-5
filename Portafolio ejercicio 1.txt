@@ -1,0 +1,107 @@
+section .data
+    msg1 db 'Ingrese el primer número: ', 0
+    msg2 db 'Ingrese el segundo número: ', 0
+    msg3 db 'Ingrese el tercer número: ', 0
+    resultmsg db 'El resultado de la resta es: ', 0
+    
+section .bss
+    num1 resw 1
+    num2 resw 1
+    num3 resw 1
+    result resw 1
+    ascii_result resb 5  
+
+section .text
+    global _start
+
+_start:
+    mov eax, 4           
+    mov ebx, 1           
+    mov ecx, msg1        
+    mov edx, msglen      
+    int 0x80             
+
+    mov eax, 3           
+    mov ebx, 0           
+    mov ecx, num1        
+    mov edx, 2           
+    int 0x80             
+
+    mov ax, [num1]
+    sub ax, 0x30
+    mov [num1], ax
+
+    mov eax, 4           
+    mov ebx, 1           
+    mov ecx, msg2        
+    mov edx, msglen      
+    int 0x80             
+
+    mov eax, 3           
+    mov ebx, 0           
+    mov ecx, num2        
+    mov edx, 2           
+    int 0x80             
+
+    mov ax, [num2]
+    sub ax, 0x30
+    mov [num2], ax
+
+    mov eax, 4           
+    mov ebx, 1           
+    mov ecx, msg3        
+    mov edx, msglen      
+    int 0x80             
+
+    mov eax, 3           
+    mov ebx, 0           
+    mov ecx, num3        
+    mov edx, 2           
+    int 0x80             
+
+    mov ax, [num3]
+    sub ax, 0x30
+    mov [num3], ax
+
+    mov ax, [num1]      
+    sub ax, [num2]      
+    sub ax, [num3]      
+    mov [result], ax    
+
+    mov ax, [result]
+    call int_to_ascii
+
+    mov eax, 4           
+    mov ebx, 1           
+    mov ecx, resultmsg   
+    mov edx, resultmsglen
+    int 0x80             
+
+    mov eax, 4           
+    mov ebx, 1           
+    mov ecx, ascii_result     
+    mov edx, 5           
+    int 0x80             
+
+    mov eax, 1           
+    xor ebx, ebx         
+    int 0x80             
+
+int_to_ascii:
+    mov bx, 10      
+    mov di, ascii_result + 4   
+
+    mov cx, 5       
+
+    .convert_loop:
+        xor dx, dx          
+        div bx              
+        add dl, '0'         
+        dec di              
+        mov [di], dl        
+        loop .convert_loop 
+
+    ret
+
+msglen equ $ - msg1
+resultmsglen equ $ - resultmsg

@@ -1,0 +1,88 @@
+section .data
+    msg1 db 'Ingrese el primer número (de un solo dígito): ', 0
+    msg1len equ $ - msg1
+
+    msg2 db 'Ingrese el segundo número (de un solo dígito): ', 0
+    msg2len equ $ - msg2
+
+    resultmsg db 'El resultado de la multiplicación es: ', 0
+    resultmsglen equ $ - resultmsg
+
+section .bss
+    num1 resb 2    
+    num2 resb 2    
+    result resb 4  
+
+section .text
+    global _start
+
+_start:
+    mov eax, 4            
+    mov ebx, 1            
+    mov ecx, msg1         
+    mov edx, msg1len      
+    int 0x80              
+
+    mov eax, 3            
+    mov ebx, 0            
+    mov ecx, num1         
+    mov edx, 2            
+    int 0x80              
+
+    movzx eax, byte [num1]
+    sub eax, '0'
+    mov [num1], al
+
+    mov eax, 4            
+    mov ebx, 1            
+    mov ecx, msg2         
+    mov edx, msg2len      
+    int 0x80              
+
+    mov eax, 3            
+    mov ebx, 0            
+    mov ecx, num2         
+    mov edx, 2            
+    int 0x80              
+
+    movzx eax, byte [num2]
+    sub eax, '0'
+    mov [num2], al
+
+    mov al, [num1]        
+    mov bl, [num2]        
+    mul bl                
+    mov [result], ax      
+
+    mov eax, dword [result] 
+    call int_to_ascii       
+
+    mov eax, 4            
+    mov ebx, 1            
+    mov ecx, resultmsg    
+    mov edx, resultmsglen 
+    int 0x80              
+
+    mov eax, 4            
+    mov ebx, 1            
+    mov ecx, result       
+    mov edx, 4            
+    int 0x80              
+
+    mov eax, 1            
+    xor ebx, ebx          
+    int 0x80              
+
+int_to_ascii:
+    add eax, '0'           
+    mov [result+3], al     
+    shr eax, 8             
+    add eax, '0'           
+    mov [result+2], al     
+    shr eax, 8             
+    add eax, '0'           
+    mov [result+1], al     
+    shr eax, 8             
+    add eax, '0'           
+    mov [result], al       
+    ret
